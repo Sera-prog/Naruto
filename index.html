@@ -2,19 +2,44 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Jeu de Plateau Naruto - 3 Joueurs</title>
+<title>Jeu Naruto - Dés indépendants</title>
 <style>
 body {
     font-family: "Comic Sans MS", cursive, sans-serif;
     text-align: center;
-    background: #1A1A2E no-repeat center top;
-    background-size: cover;
-    color: #333;
+    background: #1A1A2E;
+    color: #fff;
 }
 
-h1 {
-    color: #FF6600;
-    text-shadow: 2px 2px #000;
+h1 { color: #FF6600; text-shadow: 2px 2px #000; margin-top: 20px; }
+
+#diceContainer {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
+
+.diceBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.dice {
+    font-size: 40px;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #FFE4B5;
+    color: #FF4500;
+    border-radius: 15px;
+    border: 3px solid #FF6600;
+    box-shadow: 2px 2px 5px #000;
 }
 
 .board {
@@ -23,7 +48,7 @@ h1 {
     grid-template-rows: repeat(3, 120px);
     gap: 15px;
     justify-content: center;
-    margin-top: 30px;
+    margin: 30px auto;
 }
 
 .cell {
@@ -37,7 +62,6 @@ h1 {
     position: relative;
     border-radius: 15px;
     box-shadow: 3px 3px 8px rgba(0,0,0,0.4);
-    font-family: "Verdana", sans-serif;
 }
 
 .players {
@@ -46,77 +70,81 @@ h1 {
     font-size: 20px;
 }
 
-.p1 { color: #FF4500; } /* Orange Tetra Uzumaki */
-.p2 { color: #1E90FF; } /* Bleu Sera Hyûga */
-.p3 { color: #FF0000; } /* Rouge Stan Hôzuki */
+.p1 { color: #1E90FF; }
+.p2 { color: #8A2BE2; }
+.p3 { color: #FF4500; }
 
 button {
-    margin-top: 20px;
-    padding: 12px 25px;
-    font-size: 18px;
+    padding: 8px 15px;
+    font-size: 16px;
     cursor: pointer;
     background: #FF6600;
     color: white;
     border: 2px solid #000;
-    border-radius: 10px;
+    border-radius: 8px;
     box-shadow: 2px 2px #000;
-    transition: all 0.2s;
 }
-button:hover {
-    background: #FF4500;
-}
-
-#diceDisplay {
-    font-size: 60px;
-    margin: 30px;
-    color: #FF6600;
-    text-shadow: 2px 2px #000;
-}
-
-#info {
-    margin-top: 20px;
-    font-size: 22px;
-    font-weight: bold;
-    color: #1E90FF;
-    text-shadow: 1px 1px #000;
-}
+button:hover { background: #FF4500; }
 </style>
 </head>
 <body>
 
-<h1>🎴 Jeu de Plateau Naruto - 3 Joueurs 🎴</h1>
+<h1>🎴 Jeu Naruto - Dés indépendants 🎴</h1>
 
-<div id="diceDisplay">🎲</div>
+<div id="diceContainer">
+    <div class="diceBox">
+        <div class="dice" id="dice100">100</div>
+        <button onclick="rollDice('d100')">1-100</button>
+    </div>
+
+    <div class="diceBox">
+        <div class="dice" id="dice10">10</div>
+        <button onclick="rollDice('d10')">1-10</button>
+    </div>
+
+    <div class="diceBox">
+        <div class="dice" id="dice9">9</div>
+        <button onclick="rollDice('d9')">1-9</button>
+    </div>
+
+    <div class="diceBox">
+        <div class="dice" id="dice3">3</div>
+        <button onclick="rollDice('d3')">1-3</button>
+    </div>
+
+    <div class="diceBox">
+        <div class="dice" id="dice2">2</div>
+        <button onclick="rollDice('d2')">1-2</button>
+    </div>
+</div>
 
 <div class="board" id="board"></div>
 
-<button onclick="rollDice()">Lancer le dé</button>
-
-<div id="info"></div>
-
 <script>
 const board = document.getElementById("board");
-const info = document.getElementById("info");
-const diceDisplay = document.getElementById("diceDisplay");
+const dice100 = document.getElementById("dice100");
+const dice10 = document.getElementById("dice10");
+const dice3 = document.getElementById("dice3");
+const dice2 = document.getElementById("dice2");
+const dice9 = document.getElementById("dice9");
 
 const players = [
-    { name: "Tetra Uzumaki", position: null, class: "p1" },
-    { name: "Sera Hyûga", position: null, class: "p2" },
-    { name: "Stan Hôzuki", position: null, class: "p3" }
+    { name: "Sera Hyûga", position: null, class: "p1" },
+    { name: "Stan Hôzuki", position: null, class: "p2" },
+    { name: "Tetra Uzumaki", position: null, class: "p3" }
 ];
 
 let currentPlayer = 0;
 
 // Créer les 9 cases
 for (let i = 1; i <= 9; i++) {
-    let cell = document.createElement("div");
+    const cell = document.createElement("div");
     cell.classList.add("cell");
     cell.id = "cell-" + i;
     cell.innerHTML = i + '<div class="players" id="players-' + i + '"></div>';
     board.appendChild(cell);
 }
 
-// Mettre à jour le plateau
 function updateBoard() {
     for (let i = 1; i <= 9; i++) {
         document.getElementById("players-" + i).innerHTML = "";
@@ -132,21 +160,37 @@ function updateBoard() {
     });
 }
 
-// Lancer un dé de 1 à 9
-function rollDice() {
-    const dice = Math.floor(Math.random() * 9) + 1;
-    diceDisplay.textContent = dice; 
+// Fonction pour lancer un dé
+function rollDice(diceType) {
+    let roll;
+    let player = players[currentPlayer];
 
-    const player = players[currentPlayer];
-    player.position = dice; 
-    updateBoard();
-
-    info.textContent = player.name + " a lancé : " + dice;
-
-    currentPlayer = (currentPlayer + 1) % players.length;
+    switch(diceType) {
+        case 'd100': 
+            roll = Math.floor(Math.random() * 100) + 1; 
+            dice100.textContent = roll; 
+            break;
+        case 'd10': 
+            roll = Math.floor(Math.random() * 10) + 1; 
+            dice10.textContent = roll; 
+            break;
+        case 'd3': 
+            roll = Math.floor(Math.random() * 3) + 1; 
+            dice3.textContent = roll; 
+            break;
+        case 'd2': 
+            roll = Math.floor(Math.random() * 2) + 1; 
+            dice2.textContent = roll; 
+            break;
+        case 'd9': 
+            roll = Math.floor(Math.random() * 9) + 1; 
+            dice9.textContent = roll;
+            player.position = roll;
+            updateBoard();
+            currentPlayer = (currentPlayer + 1) % players.length; 
+            break;
+    }
 }
-
-info.textContent = "C'est au tour de Naruto";
 </script>
 
 </body>
